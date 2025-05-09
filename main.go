@@ -24,14 +24,19 @@ var (
 )
 
 func main() {
-	fmt.Println("1414-------------")
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting working directory:", err)
+		return
+	}
+	fmt.Println("Current directory is: ", cwd)
 	go playSound("sound\\startProgram.mp3")
-
+	fmt.Println("======= Listening for pressing by keyboard & mouse =======")
 	keyChan := hook.Start()
 	defer hook.End()
 	ctx, cancel = context.WithCancel(context.Background())
 	for key := range keyChan {
-		if key.Kind == hook.KeyHold && key.Rawcode == 20 && key.Keychar == 65535 { // listen CapsLock key press
+		if key.Kind == hook.KeyHold && key.Rawcode == 255 && key.Keychar == 65535 { // listen CapsLock key press
 			// cause we might be dancing our cav (zxzx), so we need to stop function - cavDancin first
 			cancel()
 			wg.Wait()
@@ -55,21 +60,21 @@ func main() {
 			os.Exit(0)
 		} else if key.Kind == hook.KeyDown && key.Rawcode == 13 {
 			fmt.Println("Enter pressed. Exiting program.")
-
 			// closeProgramPath := cwd + "sound\\closeProgram.mp3"
 			// fmt.Println("closeProgramPath: ", closeProgramPath)
 			go playSound(CloseProgramPath)
 			time.Sleep(103 * time.Millisecond)
 			robotgo.KeyTap(";")
-			fmt.Println("Enter pressed. Exiting program END.")
+			// fmt.Println("Enter pressed. Exiting program END.")
 
 			cancel()
 			hook.End()
 			time.Sleep(100 * time.Millisecond) // let goroutines respond to cancel
 			os.Exit(0)
-		} else {
-			fmt.Printf("%+v\n", key)
 		}
+		// else if key.Kind == hook.KeyHold || key.Kind == hook.KeyDown || key.Kind == hook.KeyUp {
+		// 	fmt.Printf("%+v\n", key)
+		// }
 	}
 }
 
@@ -122,11 +127,11 @@ func cavDancing(ctx context.Context) {
 func playSound(relativePath string) {
 	cwd, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Error getting working directory:", err)
+		// fmt.Println("Error getting working directory:", err)
 		return
 	}
 	mp3Path := filepath.Join(cwd, relativePath)
-	fmt.Println("Playing:", mp3Path)
+	// fmt.Println("Playing:", mp3Path)
 
 	cmd := exec.Command("ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", mp3Path)
 	cmd.Stdout = os.Stdout
