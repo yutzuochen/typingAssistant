@@ -21,6 +21,8 @@ var (
 var (
 	CloseProgramPath = "sound\\closeProgram.mp3"
 	StartProgramPath = "sound\\startProgram.mp3"
+	PendingPath      = "sound\\pending.mp3"
+	EndPendingPath   = "sound\\endPending.mp3"
 )
 
 func main() {
@@ -33,7 +35,7 @@ func main() {
 	fmt.Println("Current directory is: ", cwd)
 	// Detect language input. if current input is Chinese, then reminds user.
 
-	go playSound("sound\\startProgram.mp3")
+	go playSound(StartProgramPath)
 	fmt.Println("======= Listening for pressing by keyboard & mouse =======")
 	keyChan := hook.Start()
 	defer hook.End()
@@ -64,7 +66,6 @@ func mainLoop(keyChan chan hook.Event) {
 		if key.Kind == hook.KeyHold && key.Rawcode == 187 { // listen "=" key press (my new 'Capslock')
 			// cause we might be dancing our cav (zxzx), so we need to stop function - cavDancin first
 			fmt.Printf("pressing chaged-CapsLock: %+v\n", key)
-
 			cancel()
 			wg.Wait()
 			ctx, cancel = context.WithCancel(context.Background())
@@ -73,45 +74,36 @@ func mainLoop(keyChan chan hook.Event) {
 		} else if key.Kind == hook.KeyDown && key.Rawcode == 67 { // listen for "c" or "C"
 			wg.Add(1)
 			go cavDancing(ctx)
-		} else if key.Kind == hook.KeyDown && key.Rawcode == 13 && key.Mask == 2 {
+		} else if key.Kind == hook.KeyDown && key.Rawcode == 13 && key.Mask == 2 { // pressing Enter + Ctrl
+			go playSound(CloseProgramPath)
 			fmt.Println("Enter + Ctrl pressed. Exiting program.")
-			time.Sleep(103 * time.Millisecond)
-			robotgo.KeyTap("*")
-			// fmt.Println("Ctrl + Enter pressed. Exiting program.")
+
+			// robotgo.KeyTap("*")
 			cancel()
+			time.Sleep(103 * time.Millisecond)
 			wg.Wait()
 			os.Exit(0)
 		} else if key.Kind == hook.KeyDown && key.Rawcode == 13 { // pressing Enter
-			fmt.Println("Enter pressed. Exiting program.")
-			go playSound(CloseProgramPath)
-			time.Sleep(103 * time.Millisecond)
-			robotgo.KeyTap(";")
-			// fmt.Println("Enter pressed. Exiting program END.")
-
 			cancel()
-
-			keyChan2 := hook.Start()
+			ctx, cancel = context.WithCancel(context.Background())
+			fmt.Println("Enter pressed. Pending program.")
+			go playSound(PendingPath)
+			time.Sleep(53 * time.Millisecond)
+			robotgo.KeyTap(";")
 			signal := make(chan bool)
-			go pending(keyChan2, signal)
+			go pending(keyChan, signal)
 			<-signal
 			fmt.Println("===== open the pending channel =======")
-			ctx, cancel = context.WithCancel(context.Background())
 
 			// keyChan = hook.Start()
 			// hook.End()
-			break
+			// break
 			// pendingCh := make(chan string)
 			// hook.End()
 			// time.Sleep(100 * time.Millisecond) // let goroutines respond to cancel
 			// os.Exit(0)
 		}
-		// }else {
-		// 	fmt.Printf("%+v\n", key)
-		// }
 
-		// else if key.Kind == hook.KeyHold || key.Kind == hook.KeyDown || key.Kind == hook.KeyUp {
-		// 	fmt.Printf("%+v\n", key)
-		// }
 	}
 	fmt.Println("end mainLoop")
 }
@@ -173,17 +165,18 @@ func playSound(relativePath string) {
 	}
 }
 
-func pending(keyChan2 chan hook.Event, signal chan bool) {
+func pending(keyChan chan hook.Event, signal chan bool) {
 	// keyChan2 := hook.Start()
-	for key2 := range keyChan2 {
-		if key2.Kind == hook.KeyHold && key2.Rawcode == 187 { // "if press capslock"
-			// fmt.Println("[pending1]")
-			fmt.Printf("[pending1] %+v\n", key2)
+	for key := range keyChan {
+		if key.Kind == hook.KeyHold && key.Rawcode == 187 { // "if press capslock"
+			go playSound(EndPendingPath)
+			fmt.Printf("[pending1] %+v\n", key)
 			// hook.End()
 			signal <- true
-		} else if key2.Kind == hook.KeyHold || key2.Kind == hook.KeyDown {
+			return
+		} else if key.Kind == hook.KeyHold || key.Kind == hook.KeyDown {
 			// fmt.Println("====== pending2 ======")
-			fmt.Printf("[pending2] %+v\n", key2)
+			fmt.Printf("[pending2] %+v\n", key)
 		}
 	}
 }
