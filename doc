@@ -1,0 +1,11 @@
+[!!note!!] The function of listening Capslock is only when you disable your letter case changing
+
+# Build a executive file
+go build -o exeFiles/cavCiviPressing.exe main.go
+
+# Make shortcut for executable file
+./makeShortcutForExe.ps1
+
+# Go to directory the file locates and then right-click the shortcut file. Pin it to start menu.
+
+
