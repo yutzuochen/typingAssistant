@@ -35,14 +35,14 @@ func main() {
 
 	go playSound("sound\\startProgram.mp3")
 	fmt.Println("======= Listening for pressing by keyboard & mouse =======")
-	// keyChan := hook.Start()
-	// defer hook.End()
+	keyChan := hook.Start()
+	defer hook.End()
 	ctx, cancel = context.WithCancel(context.Background())
-	for {
-		keyChan := hook.Start()
-		mainLoop(keyChan)
-		hook.End()
-	}
+	// for {
+	// keyChan := hook.Start()
+	mainLoop(keyChan)
+	// hook.End()
+	// }
 	fmt.Println("end of main")
 }
 
@@ -73,11 +73,6 @@ func mainLoop(keyChan chan hook.Event) {
 		} else if key.Kind == hook.KeyDown && key.Rawcode == 67 { // listen for "c" or "C"
 			wg.Add(1)
 			go cavDancing(ctx)
-		} else if key.Kind == hook.KeyDown && key.Rawcode == 69 { // listen for "e" or "E"
-			// fmt.Printf("pressing 'e' %+v\n", key)
-			cancel()
-			wg.Wait()
-			ctx, cancel = context.WithCancel(context.Background())
 		} else if key.Kind == hook.KeyDown && key.Rawcode == 13 && key.Mask == 2 {
 			fmt.Println("Enter + Ctrl pressed. Exiting program.")
 			time.Sleep(103 * time.Millisecond)
