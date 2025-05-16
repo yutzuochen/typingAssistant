@@ -33,6 +33,17 @@ func init() {
 		fmt.Println("Error getting working directory:", err)
 		return
 	}
+	// Use this script to switch language into English for avoiding the chinese typing bug
+	psScript := `C:\Users\ASUS\Documents\typingAssistant\languageChange.ps1`
+	cmd := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", psScript)
+
+	// Capture output if needed
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("Error executing PowerShell script: %v\n", err)
+	}
+
+	fmt.Printf("Output:\n%s\n", string(output))
 }
 
 func main() {
