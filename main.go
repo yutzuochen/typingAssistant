@@ -36,7 +36,7 @@ func init() {
 }
 
 func main() {
-	fmt.Println("[ver.2] Current directory is: ", cwd)
+	fmt.Println("[ver.3] Current directory is: ", cwd)
 	// Detect language input. if current input is Chinese, then reminds user.
 
 	StartProgramPath := filepath.Join(cwd, StartProgramRelativePath)
