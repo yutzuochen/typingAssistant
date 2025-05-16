@@ -32,7 +32,7 @@ Write-Host "Current input language ID: 0x$langID" -ForegroundColor Cyan
 
 # 0x0404 = Traditional Chinese (Taiwan)
 if ($langID -eq 0x0404) {
-    Write-Host "Language is Traditional Chinese. Sending Ctrl + Shift + 0 to switch into Englisjj" -ForegroundColor Yellow
+    Write-Host "Language is Traditional Chinese. Sending Ctrl + Shift + 0 to switch into English" -ForegroundColor Yellow
 
     $wshell = New-Object -ComObject wscript.shell
     $wshell.SendKeys("^+0")  # Ctrl + Shift + 0
