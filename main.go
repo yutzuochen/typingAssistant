@@ -22,7 +22,7 @@ var (
 var (
 	CloseProgramRelativePath = "sound\\closeProgram.mp3"
 	StartProgramRelativePath = "sound\\startProgram.mp3"
-	PendingRelativePath      = "sound\\pending.mp3"
+	PendingRelativePath      = "sound\\pendingNow.mp3"
 	EndPendingRelativePath   = "sound\\endPending.mp3"
 )
 
@@ -36,7 +36,7 @@ func init() {
 }
 
 func main() {
-	fmt.Println("Current directory is: ", cwd)
+	fmt.Println("[ver.2] Current directory is: ", cwd)
 	// Detect language input. if current input is Chinese, then reminds user.
 
 	StartProgramPath := filepath.Join(cwd, StartProgramRelativePath)
@@ -79,8 +79,8 @@ func mainLoop(keyChan chan hook.Event) {
 			cancel()
 			ctx, cancel = context.WithCancel(context.Background())
 			fmt.Println("Enter pressed. Pending program.")
-			PendingPath := filepath.Join(cwd, PendingRelativePath)
-			go playSound(PendingPath)
+			pendingPath := filepath.Join(cwd, PendingRelativePath)
+			go playSound(pendingPath)
 			time.Sleep(53 * time.Millisecond)
 			robotgo.KeyTap(";")
 			signal := make(chan bool)
@@ -146,9 +146,8 @@ func playSound(absPath string) {
 func pending(keyChan chan hook.Event, signal chan bool) {
 	for key := range keyChan {
 		if key.Kind == hook.KeyHold && key.Rawcode == 187 { // "if press capslock"
-			StartProgramPath := filepath.Join(cwd, StartProgramRelativePath)
-			go playSound(StartProgramPath)
-			// fmt.Printf("[pending1] %+v\n", key)
+			endPendingPath := filepath.Join(cwd, EndPendingRelativePath)
+			go playSound(endPendingPath)
 			// to open the pending lock
 			signal <- true
 			return
